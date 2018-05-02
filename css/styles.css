@@ -1,0 +1,36 @@
+
+.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  border: 0px;      
+  border-radius: 8px;   
+}
+
+table {
+  text-align: center;
+  padding: 40px;
+  margin: 0 auto;
+}
+
+th {
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.league {
+  text-align: center;
+  font-size: 40px;
+  font-weight: 400;
+}
+
+.league-position {
+  text-align: center;
+}
+
+.table-data {
+  width: 100%;
+}
