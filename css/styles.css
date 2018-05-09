@@ -34,3 +34,12 @@ th {
 .table-data {
   width: 100%;
 }
+
+#league-position-by-matchday {
+  margin: 0 auto;
+}
+
+.legend {
+  color: #ccc;
+  font-size: 12px;
+}

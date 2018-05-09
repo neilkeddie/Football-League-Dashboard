@@ -1,4 +1,5 @@
 var url;
+var season;
 var tableUrl;
 var matchDayUrl = [];
 var leagueTitle;
@@ -6,7 +7,7 @@ var leagueId;
 var numberOfMatchDays;
 
 document.getElementById("2015").onclick = function(event) {
-  var season = 2015;
+  season = 2015;
   url= 'https://api.football-data.org/v1/competitions/?season='+season+'';
 
   getData( function(data) {
@@ -16,7 +17,7 @@ document.getElementById("2015").onclick = function(event) {
 };
 
 document.getElementById("2016").onclick = function(event) {
-  var season = 2016;
+  season = 2016;
   url = 'https://api.football-data.org/v1/competitions/?season='+season+'';
   
   getData( function(data) {
@@ -25,7 +26,7 @@ document.getElementById("2016").onclick = function(event) {
 };
 
 document.getElementById("2017").onclick = function(event) {
-  var season = 2017;
+  season = 2017;
   url = 'https://api.football-data.org/v1/competitions/?season='+season+'';
   
   getData( function(data) {
@@ -128,7 +129,51 @@ function show_league_table(transactionData) {
   document.getElementById("league-position-by-matchday").innerHTML = "";
   document.getElementById("league-table").innerHTML = "";
   document.getElementById("league-name").innerHTML = leagueTitle;
+  
+  var tag = '<a href="https://en.wikipedia.org/wiki/'+season+'%E2%80%93'+(season-1999)+'_';
+  
+  if ( leagueTitle.includes("Eredivisie")) {
+    tag += 'Eredivisie" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("1. Bundesliga")) {
+    tag += 'Bundesliga" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("2. Bundesliga")) {
+    tag += '2._Bundesliga" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("3. Bundesliga")) {
+    tag += '3._Bundesliga" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Premier League")) {
+    tag += 'Premier_League" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Championship")) {
+    tag += 'EFL_Championship" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("League One")) {
+    tag += 'EFL_League_One" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("League Two")) {
+    tag += 'EFL_League_Two" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("National League")) {
+    tag += 'National_League" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("League Two")) {
+    tag += 'EFL_League_Two" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Serie A")) {
+    tag += 'Serie_A" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Serie B")) {
+    tag += 'Serie_B" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Ligue 1")) {
+    tag += 'Ligue_1" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Ligue 2")) {
+    tag += 'Ligue_2" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Primeira Liga")) {
+    tag += 'Primeira_Liga" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Liga Adelante")) {
+    tag += 'Liga_Adelante" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Primera Division")) {
+    tag += 'Primera_Division" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("Campeonata")) {
+    tag = '<a href="https://en.wikipedia.org/wiki/'+season+'_Campeonato_Brasileiro_S%C3%A9rie_A" target="_blank" >Wiki Info for League Season</a>';
+  } else if ( leagueTitle.includes("A League")) {
+    tag += 'A-League" target="_blank" >Wiki Info for League Season</a>';
+  }
 
+  document.getElementById("league-info").innerHTML = tag;
+      
   for(var i = 0; i < transactionData.standing.length; i++){
     transactionData.standing[i].team =  transactionData.standing[i]['teamName'];
     transactionData.standing[i].played =  transactionData.standing[i]['playedGames'];
@@ -234,9 +279,12 @@ function calculate_chart_data(callback) {
 
 function show_league_by_matchday(data) {
   
+  var legendSize = 18;
+  var legendSpacing = 6;
+
   var seasonData = data.season;
   seasonData.sort(function(a,b) {return a.matchday - b.matchday;});
-  console.log(seasonData);
+
   var ndx = crossfilter(data.season);
   var keys = d3.keys(d3.values(seasonData[0]));
   
@@ -245,13 +293,13 @@ function show_league_by_matchday(data) {
   var maxMatchday = matchday_dim.top(1)[0].matchday;
 
   var vis = d3.select("#league-position-by-matchday"),
-    width = 1000,
+    width = 800,
     height = 500,
     margins = {
         top: 20,
-        right: 20,
+        right: 40,
         bottom: 20,
-        left: 50
+        left: 40
     },
     xScale = d3.scale.linear().range([margins.left, width - margins.right]).domain([minMatchday,maxMatchday]),
     yScale = d3.scale.linear().range([height - margins.top, margins.bottom]).domain([keys.length -1,1]),
@@ -265,9 +313,23 @@ function show_league_by_matchday(data) {
     .attr("transform", "translate(0," + (height - margins.bottom) + ")")
     .call(xAxis);
     
+    vis.append("text")
+      .attr("x", width / 2)
+      .attr("y", height + margins.bottom)
+      .style("text-anchor","middle")
+      .text("Matchday");
+    
     vis.append("svg:g")
     .attr("transform", "translate(" + (margins.left) + ",0)")
     .call(yAxis);
+    
+    vis.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margins.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Position");
     
     var keyValue = d3.keys(seasonData[1]);
     
@@ -276,14 +338,23 @@ function show_league_by_matchday(data) {
     .style("position", "absolute")
     .style("display", "block")
     .style("opacity","0");
-
+    
+    var legendData = [{}];
+    var legendString = {};
+    
     for (var i=1;i < keys.length; i++) {
+
         if ( d3.keys(seasonData[1]) == 'matchday' ) {
             console.log('Not a team name');
         } else {
         var team = 'd.'+keyValue[i];
         var teamColor = getRandomColor();
         
+        legendString["team"] = keyValue[i];
+        legendString["color"] = teamColor;
+        legendData.push(legendString);
+        legendString = {};
+
         var lineGen = d3.svg.line()
                         .x(function(d) {
                         return xScale(d.matchday);
@@ -304,6 +375,10 @@ function show_league_by_matchday(data) {
         	      d3.selectAll(selectlines)
         		    .style("opacity",0.2);
 
+        		    var legendIcons = $(".legend").not(legend-this.id);
+        		    d3.selectAll(legendIcons)
+        		    .style("opacity",0.2);
+        		    
       		      d3.select(this)                          //on mouseover of each line, give it a nice thick stroke
         	      .style("stroke-width",'6px');
         	      tooltip
@@ -313,24 +388,66 @@ function show_league_by_matchday(data) {
                 .style("left", (d3.event.pageX - 50) + "px")   
                 .style("top", (d3.event.pageY - 50) + "px")
         		    .style("opacity","1");
-    	})
-    	.on("mouseout",	function(d) {        //undo everything on the mouseout
-      		var selectlines = $(".line").not(this);
-        	d3.selectAll(selectlines)
-        		.style("opacity",1);
-      		d3.select(this)
-        		.style("stroke-width",'1px');
-        		 tooltip
-        		    .style("opacity","0");
-
-
-    });
-    
+        		    
+        		    var legendId = '#legend-'+this.id;
+        		    console.log(legendId);
+        		    d3.select(''+legendId+'')
+        		    .style("width","25px")
+        		    .style("height","25px")
+        		    .style("opacity","1");
+        		    
+    	        })
+    	        .on("mouseout",	function(d) {        //undo everything on the mouseout
+            		var selectlines = $(".line").not(this);
+              	d3.selectAll(selectlines)
+              		.style("opacity",1);
+              		
+              	var legendIcons = $(".legend").not(this.id);
+              	d3.selectAll(legendIcons)
+        		    .style("opacity",1);	
+              		
+            		d3.select(this)
+              		.style("stroke-width",'1px');
+              		 tooltip
+              		    .style("opacity","0");
+          });
 
 }
+    var aspect = width / height;
+    chart = d3.select('#league-position-by-matchday');
+    d3.select(window)
+    .on("resize", function() {
+    var targetWidth = chart.node().getBoundingClientRect().width;
+    chart.attr("width", targetWidth);
+    chart.attr("height", targetWidth / aspect);
+  });
 
-}
+  }
+  
+  legendData.shift();
 
+  var legend = vis.selectAll('.legend')
+                 .data(legendData)
+                 .enter()
+                 .append('g')
+                  .attr('class', 'legend')
+                  .attr('id',function(d) { return 'legend-'+ d.team })
+                  .attr('transform', function(d, i) {
+                  var horz = width + legendSize;
+                  var vert = (legendSize * i+1) + (2 * legendSpacing) + 4;
+                  return 'translate(' + horz + ',' + vert + ')';
+                  });
+                  
+            legend.append('rect')
+                  .attr('width', legendSize)
+                  .attr('height', legendSize)
+                  .style('fill', function(d) { return d.color})
+                  .style('stroke', function(d) { return d.color});
+                  
+                legend.append('text')
+                  .attr('x', legendSize + legendSpacing)
+                  .attr('y', legendSize - legendSpacing)                
+                  .text( function(d) { return d.team });
 }
 
 function getRandomColor() {
