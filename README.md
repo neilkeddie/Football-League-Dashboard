@@ -1,18 +1,25 @@
+Football Data Dashboard
 
-     ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
-    '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
-    |  |    |  || .-. ||  ||  |' .-. |`..'  |  |  ||  |  \  :|  `--, 
-    '  '--'\|  |' '-' ''  ''  '\ `-' | .'  /   |  ||  '--'  /|  `---.
-     `-----'`--' `---'  `----'  `---'  `--'    `--'`-------' `------'
-    ----------------------------------------------------------------- 
+This project uses JSON data from http://api.football-data.org/index to display the information.
 
+League Tables
 
-Hi there! Welcome to Cloud9 IDE!
+There are several league table selections from 2015/16 season through to 2017/18 season to choose from.
+Once you have chosen a league then the table will display from the last available matchday, so for seasons that are finished it will be the final league table.
 
-To get you started, create some files, play with the terminal,
-or visit http://docs.c9.io for our documentation.
-If you want, you can also go watch some training videos at
-http://www.youtube.com/user/c9ide.
+Once this has been created a line graph will appear below depicting a League Position by Matchday graph, which shows how each team has moved about the league 
+over the course of the season.
 
-Happy coding!
-The Cloud9 IDE team
+Cup Competitions
+
+There are a few choices for cup competitions - FA Cup, DFB Pokal, Champions League, European Championships and (hopefully) the World Cup in the Summer.
+When these are chosen the table shows the results from each round (the European Championships and Champions League show the group stage results but not
+the leagues - these hadn't been created on the API). If a game has gone to extra time or penalties this will be shown as well as the overall score.
+
+Coding
+
+The main part of the code is written in Javascript, there are some HTML & CSS used also.
+
+Re-used code
+
+I have used a random colour generator function to depict the colour of each line in the line graph.
