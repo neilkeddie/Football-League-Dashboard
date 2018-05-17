@@ -1,3 +1,9 @@
+.heading {
+  text-align: center;
+  margin: 0 auto;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
 
 .tooltip {   
   position: absolute;           
@@ -10,6 +16,44 @@
   border-radius: 8px;   
 }
 
+.selector {
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.dropdown-choice {
+  background-image: url(/images/grass.jpg);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: white;
+  height: 100%;
+}
+
+.league-table {
+  background-image: url(/images/ball.png);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 400px;
+  width: 100%;
+}
+
+.league-graph {
+  background-image: url(/images/boots.png);
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 500px;
+  width: 100%;
+  text-align: center;
+}
+.table-padding {
+  padding-bottom: 40px
+}
+.dc-select-menu, .dc-select-year-menu {
+  color: black;
+}
 table {
   text-align: center;
   padding: 40px;
@@ -19,16 +63,18 @@ table {
 th {
   text-transform: uppercase;
   text-align: center;
+  padding: 0 8px 0;
+}
+
+.wiki-link {
+  text-decoration: none;
+  color: white;
 }
 
 .league {
   text-align: center;
   font-size: 40px;
   font-weight: 400;
-}
-
-.league-position {
-  text-align: center;
 }
 
 .table-data {
@@ -42,4 +88,8 @@ th {
 .legend {
   color: #ccc;
   font-size: 12px;
+}
+
+.footer {
+  height: 80px;
 }

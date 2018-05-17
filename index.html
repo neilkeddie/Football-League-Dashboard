@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="css/styles.css" type="text/css" />
     <script type="text/javascript" src="scripts/d3.min.js"></script>
     <script type="text/javascript" src="scripts/crossfilter.min.js"></script>
@@ -12,52 +13,65 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <title>Document</title>
+    <title>Football League Dashboard</title>
 </head>
 <body>
-    <h1>Football League Data Dashboard</h1>
+    <section class="dropdown-choice">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-6">
-                <div class="dropdown-menu">
-                <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Choose a season<span class="caret"></span></a>
-                 <ul class="dropdown-menu">
-                    <li><a id="2015" href="#">2015/16</a></li>
-                    <li><a id="2016" href="#">2016/17</a></li>
-                    <li><a id="2017" href="#">2017/18</a></li>
-                 </ul>
-                </li>
-                </div>
-            </div>
-            <div class="col-xs-12 col-sm-12 col-md-6">
-                <div class="selector" id="league-selector">
-                </div>
-                <div id="league-info">
-                    
-                </div>
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                 <h1 class="heading">Football League Data Dashboard</h1>   
             </div>
         </div>
     </div>
     <div class="container-fluid">
         <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6 menu">
+                <div class="selector">
+                    <h2>Choose a Season</h2>
+                    <select id="year-dropdown" class="dc-select-year-menu">
+                        <option value> </option>
+                        <option id="2015" class="dc-select-option" value="2015/16">2015/16</option>
+                        <option id="2016" class="dc-select-option" value="2016/17">2016/17</option>
+                        <option id="2017" class="dc-select-option" value="2017/18">2017/18</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 selector">
+                <h2 id="league-choice"></h2>
+                    <div id="league-selector"></div>
+                    <div id="league-info"></div>
+            </div>
+        </div>
+    </div>
+    </section>
+    <section>
+    <div class="container-fluid league-table">
+        <div class="row table-padding">
             <div class="col-xs-12 col-sm-12 col-md-12">
-                <h2>League Table</h2>
                 <div class="league" id="league-name"></div>
+                <h2 id="league-heading" class="heading"></h2>
+                <div class="table-responsive">
+                    <div class="table-data" id="league-table"></div>
+                </div>
             </div>
         </div>
     </div> 
+    </section>
+    <section class="league-graph">
     <div class="container-fluid">
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="table-data" id="league-table"></div>
-                <div class="league-position"><h2>League Position By Matchday</h2><svg id="league-position-by-matchday" width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">></svg></div>
+                <div class="league-position">
+                    <h2 id="league-position" class="heading"></h2>
+                    <p id="matchday-error"></p>
+                    <svg id="league-position-by-matchday" width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">></svg>
+                </div>
             </div>
         </div>
     </div>
-    <div id="fixture-details"></div>
-
-    
+    </section>
 </body>
+<footer class="dropdown-choice footer"></footer>
 <script src="scripts/script.js"></script>
 </html>

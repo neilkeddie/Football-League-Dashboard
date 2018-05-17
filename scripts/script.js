@@ -6,8 +6,19 @@ var leagueTitle;
 var leagueId;
 var numberOfMatchDays;
 
-document.getElementById("2015").onclick = function(event) {
-  season = 2015;
+document.getElementById("year-dropdown").onchange = function(event) {
+  
+  var yearSelect = document.getElementById("year-dropdown").value;
+  if ( yearSelect == "2015/16") {
+    season = 2015;
+  } 
+  if ( yearSelect == "2016/17") {
+    season = 2016;
+  } 
+  if ( yearSelect == "2017/18") {
+    season = 2017;
+  }
+
   url= 'https://api.football-data.org/v1/competitions/?season='+season+'';
 
   getData( function(data) {
@@ -16,27 +27,6 @@ document.getElementById("2015").onclick = function(event) {
   
 };
 
-document.getElementById("2016").onclick = function(event) {
-  season = 2016;
-  url = 'https://api.football-data.org/v1/competitions/?season='+season+'';
-  
-  getData( function(data) {
-    plotGraphs(data);
-  });
-};
-
-document.getElementById("2017").onclick = function(event) {
-  season = 2017;
-  url = 'https://api.football-data.org/v1/competitions/?season='+season+'';
-  
-  getData( function(data) {
-    plotGraphs(data);
-  });
-  
-};
-
-
-
 function getData(callback) {
 var xhttp = new XMLHttpRequest();
 
@@ -44,8 +34,9 @@ var xhttp = new XMLHttpRequest();
 xhttp.open("GET", url, true);
 xhttp.setRequestHeader("X-Auth-Token","fcf729d656f64307888515cc3129de65");
 xhttp.send();
+xhttp.addEventListener("error", urlLoadFailed);
 
-xhttp.onreadystatechange = function() {
+xhttp.onreadystatechange = function(response) {
     if (this.readyState == 4 && this.status == 200) {
        // Typical action to be performed when the document is ready:
        callback(JSON.parse(this.responseText));
@@ -75,16 +66,23 @@ var xhttp = new XMLHttpRequest();
 xhttp.open("GET", matchDayUrl, true);
 xhttp.setRequestHeader("X-Auth-Token","fcf729d656f64307888515cc3129de65");
 xhttp.send();
+xhttp.addEventListener("error", loadFailed);
 
 xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
        // Typical action to be performed when the document is ready:
+       document.getElementById("matchday-error").innerHTML = "";
        callback(JSON.parse(this.responseText));
-    } else {
-        var headers = xhttp.status;
-        console.log(headers);
-    }
+    } 
 };
+}
+
+function urlLoadFailed() {
+  document.getElementById("league-selector").innerHTML = "Unable to display menu - please refresh and try again";
+}
+
+function loadFailed() {
+  document.getElementById("matchday-error").innerHTML = "Unable to display graph - please refresh and try again";
 }
 
 function plotGraphs(transactionData) {
@@ -97,6 +95,7 @@ document.querySelector('select[class="dc-select-menu"]').onchange=changeEventHan
 }
 
 function show_league_selector(ndx) {
+    document.getElementById("league-choice").innerHTML = "Choose a Competition";
     dim = ndx.dimension(function(d) {return [d.caption, d.id]});
     group = dim.group();
 
@@ -116,21 +115,112 @@ function changeEventHandler(event) {
 
     var fields = teamstring.split(',');
     leagueTitle = fields[0];
+    console.log(leagueTitle);
     leagueId = fields[1];
-    tableUrl = '';
-    tableUrl = 'https://api.football-data.org/v1/competitions/'+leagueId+'/leagueTable';
-
+    if (leagueTitle.includes("FA-Cup") || leagueTitle.includes("DFB-Pokal") || leagueTitle.includes("Champions League") || leagueTitle.includes("European Championship")) {
+      tableUrl = '';
+      tableUrl = 'https://api.football-data.org/v1/competitions/'+leagueId+'/fixtures';
+      } else {
+      tableUrl = '';
+      tableUrl = 'https://api.football-data.org/v1/competitions/'+leagueId+'/leagueTable';
+    }
     getTableData( function(data) {
         show_league_table(data);
     });
 } 
 
 function show_league_table(transactionData) {
+  
   document.getElementById("league-position-by-matchday").innerHTML = "";
   document.getElementById("league-table").innerHTML = "";
   document.getElementById("league-name").innerHTML = leagueTitle;
+  document.getElementById("league-heading").innerHTML = "Table";
+
+  if ( leagueTitle.includes("FA-Cup") || leagueTitle.includes("DFB-Pokal") || leagueTitle.includes("World Cup") || leagueTitle.includes("Champions League") || leagueTitle.includes("European Championship")) {
+    
+    numberOfMatchDays = transactionData.fixtures[transactionData.fixtures.length-1].matchday;
+
+    for(var i = 0; i < transactionData.fixtures.length; i++){
+      
+      if (((leagueTitle.includes("DFB-Pokal")) || (leagueTitle.includes("FA-Cup"))|| leagueTitle.includes("World Cup") || leagueTitle.includes("Champions League") || leagueTitle.includes("European Championship")) && (transactionData.fixtures[i].result.extraTime != null)) {
+        transactionData.fixtures[i].result['goalsHomeTeam'] = transactionData.fixtures[i].result['goalsHomeTeam'] + transactionData.fixtures[i].result.extraTime['goalsHomeTeam'];
+        transactionData.fixtures[i].result['goalsAwayTeam'] = transactionData.fixtures[i].result['goalsAwayTeam'] + transactionData.fixtures[i].result.extraTime['goalsAwayTeam'];
+        transactionData.fixtures[i].extratime = true;
+      
+        if (transactionData.fixtures[i].result.penaltyShootout != null) {
+          transactionData.fixtures[i].result['goalsHomeTeam'] = transactionData.fixtures[i].result['goalsHomeTeam'] + transactionData.fixtures[i].result.penaltyShootout['goalsHomeTeam'];
+          transactionData.fixtures[i].result['goalsAwayTeam'] = transactionData.fixtures[i].result['goalsAwayTeam'] + transactionData.fixtures[i].result.penaltyShootout['goalsAwayTeam'];
+          transactionData.fixtures[i].shootout = true;
+        } else {
+          transactionData.fixtures[i].shootout = false;
+        }
+        
+      } else {
+        transactionData.fixtures[i].extratime = false;
+        transactionData.fixtures[i].shootout = false;
+      }
+      transactionData.fixtures[i].home =  transactionData.fixtures[i]['homeTeamName'];
+      transactionData.fixtures[i].away =  transactionData.fixtures[i]['awayTeamName'];
+      transactionData.fixtures[i].homeGoals =  transactionData.fixtures[i].result['goalsHomeTeam'];
+      transactionData.fixtures[i].awayGoals =  transactionData.fixtures[i].result['goalsAwayTeam'];
+      delete  transactionData.fixtures[i].homeTeamName;
+      delete  transactionData.fixtures[i].awayTeamName;
+    }
+     
+		  table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
+		  var titles = d3.keys(transactionData.fixtures[0]);
+		  titles.splice(4,4);
+		  titles.splice(0,3);
+		  arraymove(titles,2,3);
+		  
+		  var headers = table.append('thead').append('tr')
+		                   .selectAll('th')
+		                   .data(titles)
+		                   .enter()
+		                   .append('th')
+		                   .attr("style","text-transform:uppercase")
+		                   .text( function (d) {
+			                    return d; 
+		                    });
+
+		  var rows = table.append('tbody').selectAll('tr')
+		               .data(transactionData.fixtures)
+		               .enter()
+		               .append('tr');
+      
+		 
+		  rows.selectAll('td')
+		  .data(function (d) {
+		   	return titles.map(function (k) {
+		   		return { 'value': d[k], 'name': k};
+		    	});
+		    })
+		    .enter()
+		    .append('td')
+		    .attr("style","text-align:center")
+		    .attr('data-th', function (d) {
+		    	return d.name;
+		    })
+		    .text(function (d) {
+		    	return d.value;
+		    });
+		    
+		    
+		    for (var j = 0; j < rows[0].length; j++) {
+
+		    if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == false) {
+		      rows[0][j].append('After Extra Time');
+
+		    } else if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == true) {
+		      rows[0][j].append('After Penalties');
+		    }
+		    }
+  } 
   
-  var tag = '<a href="https://en.wikipedia.org/wiki/'+season+'%E2%80%93'+(season-1999)+'_';
+  
+  else {
+  
+  var tag = '<a class="wiki-link" href="https://en.wikipedia.org/wiki/'+season+'%E2%80%93'+(season-1999)+'_';
   
   if ( leagueTitle.includes("Eredivisie")) {
     tag += 'Eredivisie" target="_blank" >Wiki Info for League Season</a>';
@@ -192,7 +282,7 @@ function show_league_table(transactionData) {
 
   var dataValues = d3.values(transactionData)[3];
 
-		  table = d3.select('#league-table').append('table');
+		  table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
 		  var titles = d3.keys(dataValues[0]);
 		  titles.splice(7,2);
 		  titles.splice(2,1);
@@ -206,8 +296,8 @@ function show_league_table(transactionData) {
 		                   .data(titles).enter()
 		                   .append('th')
 		                   .attr("style","text-transform:uppercase")
-		                   .text(function (d) {
-			                    return d;
+		                   .text( function (d) {
+			                    return d; 
 		                    });
 
 		  var rows = table.append('tbody').selectAll('tr')
@@ -235,6 +325,7 @@ function show_league_table(transactionData) {
 	  calculate_chart_data(function(data) {
               show_league_by_matchday(data);
     });
+  }
 }
 
 function calculate_chart_data(callback) {
@@ -256,9 +347,13 @@ function calculate_chart_data(callback) {
                   for (var j = 0; j < standings.length; j++) {
           
                     var team = data.standing[j].teamName;
+                    team = team.replace(/^\d+\.\s/, '');
+                    team = team.split('. ').join('_');
+                    team = team.split(' & ').join('_');
                     team = team.split(' ').join('_');
-                    team = team.replace(/^\d+\.\_/, '');
+                    team = team.split('-').join('_');
                     team = team.replace(/\./, '');
+
                     matchDayString[team] = data.standing[j].position;
                     
                   }
@@ -278,6 +373,7 @@ function calculate_chart_data(callback) {
 }
 
 function show_league_by_matchday(data) {
+  document.getElementById("league-position").innerHTML = "Position By Matchday";
   
   var legendSize = 18;
   var legendSpacing = 6;
@@ -325,7 +421,7 @@ function show_league_by_matchday(data) {
     
     vis.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margins.left)
+        .attr("y", 0 - 5)
         .attr("x",0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
@@ -349,7 +445,7 @@ function show_league_by_matchday(data) {
         } else {
         var team = 'd.'+keyValue[i];
         var teamColor = getRandomColor();
-        
+
         legendString["team"] = keyValue[i];
         legendString["color"] = teamColor;
         legendData.push(legendString);
@@ -375,7 +471,7 @@ function show_league_by_matchday(data) {
         	      d3.selectAll(selectlines)
         		    .style("opacity",0.2);
 
-        		    var legendIcons = $(".legend").not(legend-this.id);
+        		    var legendIcons = $(".legend").not(this.id);
         		    d3.selectAll(legendIcons)
         		    .style("opacity",0.2);
         		    
@@ -390,12 +486,15 @@ function show_league_by_matchday(data) {
         		    .style("opacity","1");
         		    
         		    var legendId = '#legend-'+this.id;
-        		    console.log(legendId);
-        		    d3.select(''+legendId+'')
-        		    .style("width","25px")
-        		    .style("height","25px")
+        		    var nested = d3.select(''+legendId+'')
         		    .style("opacity","1");
         		    
+        		    nested.selectAll("rect")
+        		    .attr('width', legendSize*2);
+                
+                nested.selectAll("text")
+        		    .attr('x', legendSize*2 + legendSpacing)
+                .style("font-weight","500");
     	        })
     	        .on("mouseout",	function(d) {        //undo everything on the mouseout
             		var selectlines = $(".line").not(this);
@@ -404,7 +503,18 @@ function show_league_by_matchday(data) {
               		
               	var legendIcons = $(".legend").not(this.id);
               	d3.selectAll(legendIcons)
-        		    .style("opacity",1);	
+        		    .style("opacity",1);
+        		    
+        		    var legendId = '#legend-'+this.id;
+        		    var nested = d3.select(''+legendId+'')
+        		    .style("opacity","1");
+        		    
+        		    nested.selectAll("rect")
+        		    .attr('width', legendSize);
+                
+                nested.selectAll("text")
+        		    .attr('x', legendSize + legendSpacing)
+                .style("font-weight","300");
               		
             		d3.select(this)
               		.style("stroke-width",'1px');
