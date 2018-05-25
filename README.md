@@ -5,10 +5,11 @@ This project uses JSON data from http://api.football-data.org/index to display t
 League Tables
 
 There are several league table selections from 2015/16 season through to 2017/18 season to choose from.
-Once you have chosen a league then the table will display from the last available matchday, so for seasons that are finished it will be the final league table.
+Once you have chosen a league then the table will display from the last available matchday, so for seasons that are finished it will be the final 
+league table.
 
-Once this has been created a line graph will appear below depicting a League Position by Matchday graph, which shows how each team has moved about the league 
-over the course of the season.
+Once this has been created a line graph will appear below depicting a League Position by Matchday graph, which shows how each team has moved about 
+the league over the course of the season.
 
 Cup Competitions
 

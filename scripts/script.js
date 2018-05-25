@@ -8,6 +8,9 @@ var numberOfMatchDays;
 
 document.getElementById("year-dropdown").onchange = function(event) {
   
+  // Check for change in dropdown menu, once changed calculate value to plug into url variable
+  // Then run getData function with url variable
+  
   var yearSelect = document.getElementById("year-dropdown").value;
   if ( yearSelect == "2015/16") {
     season = 2015;
@@ -28,23 +31,31 @@ document.getElementById("year-dropdown").onchange = function(event) {
 };
 
 function getData(callback) {
-var xhttp = new XMLHttpRequest();
+  
+// Open new http request to get data to fill drop down list with Leagues available to view
 
+var xhttp = new XMLHttpRequest();
 
 xhttp.open("GET", url, true);
 xhttp.setRequestHeader("X-Auth-Token","fcf729d656f64307888515cc3129de65");
 xhttp.send();
+
+// Check for any errors whilst getting the data
+
 xhttp.addEventListener("error", urlLoadFailed);
 
 xhttp.onreadystatechange = function(response) {
     if (this.readyState == 4 && this.status == 200) {
-       // Typical action to be performed when the document is ready:
+       // Callback data to pass into function once all returned ok.
        callback(JSON.parse(this.responseText));
     }
 };
 }
 
 function getTableData(callback) {
+  
+// Open new http request to get data from drop down list to create league table
+
 var xhttp = new XMLHttpRequest();
 
 
@@ -54,23 +65,29 @@ xhttp.send();
 
 xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-       // Typical action to be performed when the document is ready:
+       // Callback data to pass into function once all returned ok.
        callback(JSON.parse(this.responseText));
     }
 };
 }
 
 function getMatchDayTableData(callback) {
+  
+// Open new http request to get data from each matchday related to league table selected
+
 var xhttp = new XMLHttpRequest();
 
 xhttp.open("GET", matchDayUrl, true);
 xhttp.setRequestHeader("X-Auth-Token","fcf729d656f64307888515cc3129de65");
 xhttp.send();
+
+// Check for any errors whilst getting the data
+
 xhttp.addEventListener("error", loadFailed);
 
 xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-       // Typical action to be performed when the document is ready:
+       // Callback data to pass into function once all returned ok.
        document.getElementById("matchday-error").innerHTML = "";
        callback(JSON.parse(this.responseText));
     } 
@@ -108,15 +125,21 @@ function show_league_selector(ndx) {
 }
  
 function changeEventHandler(event) {
+    
+    // Clear leagueTitle and LeagueId variables so they can be overwritten when choice is made/changed
+    
     leagueTitle = '';
     leagueId = '';
     if(!event.target.value) alert('Please Select One');
     else var teamstring = event.target.value; 
-
+    
     var fields = teamstring.split(',');
     leagueTitle = fields[0];
     console.log(leagueTitle);
     leagueId = fields[1];
+    
+    // Check which competition has been chosen, if it is a cup competition then change url to show fixtures rather than table
+    
     if (leagueTitle.includes("FA-Cup") || leagueTitle.includes("DFB-Pokal") || leagueTitle.includes("Champions League") || leagueTitle.includes("European Championship")) {
       tableUrl = '';
       tableUrl = 'https://api.football-data.org/v1/competitions/'+leagueId+'/fixtures';
@@ -135,6 +158,8 @@ function show_league_table(transactionData) {
   document.getElementById("league-table").innerHTML = "";
   document.getElementById("league-name").innerHTML = leagueTitle;
   document.getElementById("league-heading").innerHTML = "Table";
+  
+  // Check for cup fixtures which have gone into Extra Time and/or Penalty shootout so we can indicate that in the table later.
 
   if ( leagueTitle.includes("FA-Cup") || leagueTitle.includes("DFB-Pokal") || leagueTitle.includes("World Cup") || leagueTitle.includes("Champions League") || leagueTitle.includes("European Championship")) {
     
@@ -167,58 +192,62 @@ function show_league_table(transactionData) {
       delete  transactionData.fixtures[i].awayTeamName;
     }
      
-		  table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
-		  var titles = d3.keys(transactionData.fixtures[0]);
-		  titles.splice(4,4);
-		  titles.splice(0,3);
-		  arraymove(titles,2,3);
-		  
-		  var headers = table.append('thead').append('tr')
-		                   .selectAll('th')
-		                   .data(titles)
-		                   .enter()
-		                   .append('th')
-		                   .attr("style","text-transform:uppercase")
-		                   .text( function (d) {
-			                    return d; 
-		                    });
-
-		  var rows = table.append('tbody').selectAll('tr')
-		               .data(transactionData.fixtures)
-		               .enter()
-		               .append('tr');
-      
-		 
-		  rows.selectAll('td')
-		  .data(function (d) {
-		   	return titles.map(function (k) {
-		   		return { 'value': d[k], 'name': k};
-		    	});
-		    })
-		    .enter()
-		    .append('td')
-		    .attr("style","text-align:center")
-		    .attr('data-th', function (d) {
-		    	return d.name;
-		    })
-		    .text(function (d) {
-		    	return d.value;
-		    });
-		    
-		    
-		    for (var j = 0; j < rows[0].length; j++) {
-
-		    if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == false) {
-		      rows[0][j].append('After Extra Time');
-
-		    } else if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == true) {
-		      rows[0][j].append('After Penalties');
-		    }
-		    }
-  } 
+     
   
+  	table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
+  	var titles = d3.keys(transactionData.fixtures[0]);
+  	
+  	// Change the titles required so we can populate the data that we want in the correct order.
+  	
+  	titles.splice(4,4);
+  	titles.splice(0,3);
+  	arraymove(titles,2,3);
+  		  
+  	var headers = table.append('thead').append('tr')
+  	              .selectAll('th')
+  	              .data(titles)
+  	              .enter()
+  	              .append('th')
+  	              .attr("style","text-transform:uppercase")
+  	              .text( function (d) {
+  	                     return d; 
+  		            });
   
-  else {
+  	var rows = table.append('tbody').selectAll('tr')
+  	           .data(transactionData.fixtures)
+  	           .enter()
+  	           .append('tr');
+        
+  		 
+  	rows.selectAll('td')
+  		  .data(function (d) {
+  		   	return titles.map(function (k) {
+  		   		return { 'value': d[k], 'name': k};
+  	     	});
+  	    })
+  		  .enter()
+  		  .append('td')
+  		  .attr("style","text-align:center")
+  		  .attr('data-th', function (d) {
+  		    	return d.name;
+  		  })
+  		  .text(function (d) {
+  		    	return d.value;
+  		  });
+  		    
+  		    
+  	for (var j = 0; j < rows[0].length; j++) {
+  
+  	    if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == false) {
+  		      rows[0][j].append('After Extra Time');
+  
+  	    } else if (rows[0][j].__data__.extratime == true && rows[0][j].__data__.shootout == true) {
+  		      rows[0][j].append('After Penalties');
+  	    }
+  	    }
+  } else {
+    
+  // Create table for league season data - append wiki link for more information on each league.
   
   var tag = '<a class="wiki-link" href="https://en.wikipedia.org/wiki/'+season+'%E2%80%93'+(season-1999)+'_';
   
@@ -264,6 +293,8 @@ function show_league_table(transactionData) {
 
   document.getElementById("league-info").innerHTML = tag;
       
+  // Update column names to be more representative of data.
+  
   for(var i = 0; i < transactionData.standing.length; i++){
     transactionData.standing[i].team =  transactionData.standing[i]['teamName'];
     transactionData.standing[i].played =  transactionData.standing[i]['playedGames'];
@@ -275,15 +306,15 @@ function show_league_table(transactionData) {
     delete  transactionData.standing[i].goals;
     delete  transactionData.standing[i].goalsAgainst;
     delete  transactionData.standing[i].goalDifference;
-}
+  }
   
   
   numberOfMatchDays = d3.values(transactionData)[2];
 
   var dataValues = d3.values(transactionData)[3];
 
-		  table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
-		  var titles = d3.keys(dataValues[0]);
+	table = d3.select('#league-table').append('table').attr("class","table").attr("class","table-bordered");
+	var titles = d3.keys(dataValues[0]);
 		  titles.splice(7,2);
 		  titles.splice(2,1);
 		  titles.splice(0,1);
@@ -291,48 +322,51 @@ function show_league_table(transactionData) {
 		  arraymove(titles,4,1);
 		  arraymove(titles,5,2);
 
-		  var headers = table.append('thead').append('tr')
-		                   .selectAll('th')
-		                   .data(titles).enter()
-		                   .append('th')
-		                   .attr("style","text-transform:uppercase")
-		                   .text( function (d) {
+	var headers = table.append('thead').append('tr')
+	                   .selectAll('th')
+	                   .data(titles).enter()
+	                   .append('th')
+	                   .attr("style","text-transform:uppercase")
+	                   .text( function (d) {
 			                    return d; 
-		                    });
+	                    });
 
-		  var rows = table.append('tbody').selectAll('tr')
-		               .data(dataValues)
-		               .enter()
-		               .append('tr');
+	var rows = table.append('tbody').selectAll('tr')
+	                .data(dataValues)
+	                .enter()
+	                .append('tr');
 		               
 		 
-		  rows.selectAll('td')
+	rows.selectAll('td')
 		  .data(function (d) {
 		   	return titles.map(function (k) {
 		   		return { 'value': d[k], 'name': k};
 		    	});
 		    })
-		    .enter()
-		    .append('td')
-		    .attr("style","text-align:center")
-		    .attr('data-th', function (d) {
+	    .enter()
+	    .append('td')
+	    .attr("style","text-align:center")
+	    .attr('data-th', function (d) {
 		    	return d.name;
 		    })
-		    .text(function (d) {
+	    .text(function (d) {
 		    	return d.value;
-		    });
+	    });
 		    
-	  calculate_chart_data(function(data) {
-              show_league_by_matchday(data);
+	 calculate_chart_data(function(data) {
+            show_league_by_matchday(data);
     });
   }
 }
 
 function calculate_chart_data(callback) {
+
   var matchDayData = [{}];
   matchDayData["season"] = [];
   var matchDayString = {};
   var count = 0;
+  
+  // Get data for each matchday for the number of matchdays
 
   for (var i = 1; i <= numberOfMatchDays; i++) {
       matchDayUrl = 'https://api.football-data.org/v1/competitions/'+leagueId+'/leagueTable/?matchday='+i+'';
@@ -343,22 +377,28 @@ function calculate_chart_data(callback) {
         var standings = d3.values(data)[3];
         
         matchDayString["matchday"] = matchDay;
+        
+        // For each team update the team names so they can be read properly without error, eliminating certain characters in names (1. * .)
 
-                  for (var j = 0; j < standings.length; j++) {
+          for (var j = 0; j < standings.length; j++) {
           
-                    var team = data.standing[j].teamName;
-                    team = team.replace(/^\d+\.\s/, '');
-                    team = team.split('. ').join('_');
-                    team = team.split(' & ').join('_');
-                    team = team.split(' ').join('_');
-                    team = team.split('-').join('_');
-                    team = team.replace(/\./, '');
+            var team = data.standing[j].teamName;
+            team = team.replace(/^\d+\.\s/, '');
+            team = team.split('. ').join('_');
+            team = team.split(' & ').join('_');
+            team = team.split(' ').join('_');
+            team = team.split('-').join('_');
+            team = team.replace(/\./, '');
 
-                    matchDayString[team] = data.standing[j].position;
-                    
-                  }
+            matchDayString[team] = data.standing[j].position;
+            }
+            
+        // Push the data into matchDayData array and then clear out the matchDayString object for the next loop
+        
         matchDayData.season.push(matchDayString); 
         matchDayString = {};
+        
+        // Check to see where about in the loop we are so we can log that the data has been calculated.
         
         if (numberOfMatchDays == (count+1)) {
           
@@ -377,6 +417,8 @@ function show_league_by_matchday(data) {
   
   var legendSize = 18;
   var legendSpacing = 6;
+
+  // Sort the data so that it is in numerical order of matchdays.
 
   var seasonData = data.season;
   seasonData.sort(function(a,b) {return a.matchday - b.matchday;});
@@ -405,9 +447,13 @@ function show_league_by_matchday(data) {
     .scale(yScale)
     .orient("left");
     
+    // Create x-axis
+    
     vis.append("svg:g")
     .attr("transform", "translate(0," + (height - margins.bottom) + ")")
     .call(xAxis);
+    
+    // Set x-axis text
     
     vis.append("text")
       .attr("x", width / 2)
@@ -415,9 +461,13 @@ function show_league_by_matchday(data) {
       .style("text-anchor","middle")
       .text("Matchday");
     
+    // Create y-axis
+    
     vis.append("svg:g")
     .attr("transform", "translate(" + (margins.left) + ",0)")
     .call(yAxis);
+    
+    // Set y-axis text
     
     vis.append("text")
         .attr("transform", "rotate(-90)")
@@ -429,11 +479,15 @@ function show_league_by_matchday(data) {
     
     var keyValue = d3.keys(seasonData[1]);
     
+    // Create tooltip to display when hovering over line
+    
     var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("position", "absolute")
     .style("display", "block")
     .style("opacity","0");
+    
+    // Create legend and line for each team
     
     var legendData = [{}];
     var legendString = {};
@@ -467,7 +521,10 @@ function show_league_by_matchday(data) {
              .attr('id',function(d){ return keyValue[i]; })
              .attr('fill', 'none')
              .on("mouseover", function (d) { 
-                var selectlines = $(".line").not(this);     //select all the rest of the lines, except the one you are hovering on and drop their opacity
+               
+                // Select all the rest of the lines, except the one you are hovering on and drop their opacity
+                
+                var selectlines = $(".line").not(this);     
         	      d3.selectAll(selectlines)
         		    .style("opacity",0.2);
 
@@ -475,7 +532,9 @@ function show_league_by_matchday(data) {
         		    d3.selectAll(legendIcons)
         		    .style("opacity",0.2);
         		    
-      		      d3.select(this)                          //on mouseover of each line, give it a nice thick stroke
+        		    // On mouseover of each line, give it a nice thick stroke, make the tooltip available and place it above the line
+        		    
+      		      d3.select(this)                          
         	      .style("stroke-width",'6px');
         	      tooltip
         		    .html(
@@ -496,7 +555,10 @@ function show_league_by_matchday(data) {
         		    .attr('x', legendSize*2 + legendSpacing)
                 .style("font-weight","500");
     	        })
-    	        .on("mouseout",	function(d) {        //undo everything on the mouseout
+    	        
+    	          // Undo everything on the mouseout
+    	          
+    	        .on("mouseout",	function(d) {        
             		var selectlines = $(".line").not(this);
               	d3.selectAll(selectlines)
               		.style("opacity",1);
@@ -534,7 +596,11 @@ function show_league_by_matchday(data) {
 
   }
   
+  // Remove the first item form legendData (which will be matchday number)
+  
   legendData.shift();
+  
+  // Create legend
 
   var legend = vis.selectAll('.legend')
                  .data(legendData)
